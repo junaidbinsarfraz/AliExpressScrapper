@@ -1,12 +1,16 @@
 package com.aliexperssscrapper.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 import com.aliexperssscrapper.model.Product;
@@ -26,7 +30,26 @@ public class ProductUtil {
 		product.setUrl(response.url().toString());
 		
 		// TODO: Create new Folder with product Id name, then save Images into the folder
-//		new File("/path/to/folder").mkdir();
+		
+		// TODO: Check this
+		Boolean isFolderCreated = new File(Constants.OUTPUT_DIRECTORY + title).mkdir();
+		
+		if(Boolean.TRUE.equals(isFolderCreated)) {
+			Elements imageTagElems = document.getElementsByClass("div.ui-box-title:contains(Product Description)+div img");
+			
+			for(Element imageTagElem : imageTagElems) {
+				Connection connection = RequestResponseUtil.makeRequest(imageTagElems.attr("src"));
+				
+				try {
+					Response imageResponse = connection.ignoreContentType(true).execute();
+					
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 		
 		// Simple price or high/low price
 		
@@ -62,6 +85,7 @@ public class ProductUtil {
 		
 		
 		// Item specifics
+		product.setItemSpecs(extractItemSpecs(document));
 		
 		return product;
 	}
@@ -110,6 +134,27 @@ public class ProductUtil {
 		}
 		
 		return colors;
+	}
+	
+	private static Map<String, String> extractItemSpecs(Document document) {
+		Map<String, String> itemSpecs = new LinkedHashMap<>();
+		
+		Elements elems = document.getElementsByClass("div.ui-box-title:contains(Item specifics)+div ul.product-property-list li.property-item");
+		
+		if(Util.isNotNullAndEmpty(elems)) {
+			
+			for(Element elem : elems) {
+				Element titleElem = elem.getElementsByClass("propery-title").first();
+				Element desElem = elem.getElementsByClass("propery-des").first();
+				
+				if(Util.isNotNull(titleElem) && Util.isNotNull(desElem)) {
+					itemSpecs.put(titleElem.text(), desElem.text());
+				}
+			}
+			
+		}
+		
+		return itemSpecs;
 	}
 	
 }
