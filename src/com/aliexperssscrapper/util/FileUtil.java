@@ -1,14 +1,13 @@
 package com.aliexperssscrapper.util;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.jsoup.Connection.Response;
 
 import com.aliexperssscrapper.model.Input;
 import com.aliexperssscrapper.model.Product;
@@ -57,6 +56,8 @@ public class FileUtil {
 	
 	public static void writeProductsOfCategory(String categoryName, List<Product> products) {
 		
+		// TODO: Change it w.r.t. logic 
+		
 		// Create folder of category name
 		
 		// Within folder create one csv file for all products to store product information
@@ -66,13 +67,30 @@ public class FileUtil {
 		
 	}
 	
-	public static void saveImage(String categoryName, String imageNameWithExtension, String imgUrl) {
+	public static void saveImage(Response response, String pathToFolder, String imgUrl) {
 		
-		try (InputStream in = new URL(imgUrl).openStream()) {
+		// TODO: Extract image name with ext from image Url
+		String name = getImageNameWithExtFromImageUrl(imgUrl);
+		
+		// output here
+		FileOutputStream out = (new FileOutputStream(new java.io.File(pathToFolder + "\\" + name)));
+		out.write(resultImageResponse.bodyAsBytes());  // resultImageResponse.body() is where the image's contents are.
+		out.close();
+		
+		/*try (InputStream in = new URL(imgUrl).openStream()) {
 			Files.copy(in, Paths.get(Constants.OUTPUT_DIRECTORY + categoryName + "\\" + imageNameWithExtension));
 		} catch (Exception e) {
 
-		}
+		}*/
+	}
+	
+	private static String getImageNameWithExtFromImageUrl(String imageUrl) {
+		String imageName = "";
+		
+		imageName = imageUrl.substring(0, imageUrl.indexOf("?"));
+		imageName = imageName.substring(imageName.lastIndexOf("/"), imageName.length() - 1);
+		
+		return imageName;
 	}
 	
 }

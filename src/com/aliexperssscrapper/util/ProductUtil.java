@@ -17,7 +17,7 @@ import com.aliexperssscrapper.model.Product;
 
 public class ProductUtil {
 	
-	public static Product extractProduct(Document document, Response response) {
+	public static Product extractProduct(Document document, Response response, String categoryName) {
 		
 		Product product = new Product();
 		
@@ -29,12 +29,15 @@ public class ProductUtil {
 		// Product page url
 		product.setUrl(response.url().toString());
 		
+		//Product Id
+		product.setId(getProductId(response.url().toString()));
+		
 		// TODO: Create new Folder with product Id name, then save Images into the folder
+		String productPath = Constants.OUTPUT_DIRECTORY + categoryName + "\\" + title;
 		
-		// TODO: Check this
-		Boolean isFolderCreated = new File(Constants.OUTPUT_DIRECTORY + title).mkdir();
+		Boolean isProductFolderCreated = new File(productPath).mkdir();
 		
-		if(Boolean.TRUE.equals(isFolderCreated)) {
+		if(Boolean.TRUE.equals(isProductFolderCreated)) {
 			Elements imageTagElems = document.getElementsByClass("div.ui-box-title:contains(Product Description)+div img");
 			
 			for(Element imageTagElem : imageTagElems) {
@@ -43,7 +46,7 @@ public class ProductUtil {
 				try {
 					Response imageResponse = connection.ignoreContentType(true).execute();
 					
-					
+					// TODO: Write into the image
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -79,13 +82,15 @@ public class ProductUtil {
 		}
 		
 		// colors 
-		product.setColors(extractColors(document));
+		product.setColors(extractColorsOrSizes(document, Boolean.TRUE));
 		
 		// sizes
-		
+		product.setSizes(extractColorsOrSizes(document, Boolean.FALSE));
 		
 		// Item specifics
 		product.setItemSpecs(extractItemSpecs(document));
+		
+		// TODO: Other Types
 		
 		return product;
 	}
@@ -102,7 +107,7 @@ public class ProductUtil {
 		return text;
 	}
 	
-	private static List<String> extractColors(Document document) {
+	private static List<String> extractColorsOrSizes(Document document, Boolean isColor) {
 		List<String> colors = new LinkedList<>();
 		
 		Elements elems = document.getElementsByClass("p-property-item");
@@ -112,7 +117,9 @@ public class ProductUtil {
 			Element dtElem = elem.child(0);
 			
 			if(Util.isNotNull(dtElem) && Util.isNotNullAndEmpty(dtElem.text())) {
-				if(dtElem.text().toLowerCase().contains(Constants.COLOR_TITLE.toLowerCase())) {
+				if(dtElem.text().toLowerCase().contains(
+						Boolean.TRUE.equals(isColor) ? Constants.COLOR_TITLE.toLowerCase() : 
+							Constants.SIZE_TITLE.toLowerCase())) {
 					// Next sibling 
 					
 					Elements linkElems = elem.select("a[data-role=sku]");
@@ -125,7 +132,9 @@ public class ProductUtil {
 						} else {
 							Element imgElem = linkElem.select("img").first();
 							
-							colors.add(imgElem.attr("title"));
+							if(Util.isNotNull(imgElem)) {
+								colors.add(imgElem.attr("title"));
+							}
 						}
 					}
 				}
@@ -155,6 +164,10 @@ public class ProductUtil {
 		}
 		
 		return itemSpecs;
+	}
+	
+	private static String getProductId(String url) {
+		return url.substring(url.lastIndexOf("/"), url.indexOf(".htm"));
 	}
 	
 }

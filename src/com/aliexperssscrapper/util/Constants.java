@@ -8,5 +8,6 @@ public interface Constants {
 	Integer TIME_OUT = 30 * 1000;
 	
 	String COLOR_TITLE = "Color";
+	String SIZE_TITLE = "Size";
 	
 }

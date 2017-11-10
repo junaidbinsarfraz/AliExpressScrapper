@@ -22,56 +22,59 @@ public class ScrapperController {
 	public List<Product> extractProductsFromCategory(Input input) {
 		List<Product> products = new LinkedList<>();
 		
-		new File(Constants.OUTPUT_DIRECTORY + input.getCategoryName()).mkdir();
+		Boolean isCategoryFolderCreated = new File(Constants.OUTPUT_DIRECTORY + input.getCategoryName()).mkdir();
 		
-		// For first request
-		String actionUrl = input.getCategoryUrl();
-		Document document = null;
-		
-		do {
-			try {
+		if(Boolean.TRUE.equals(isCategoryFolderCreated)) {
 			
-				// Make page request
-				Connection connection = RequestResponseUtil.makeRequest(actionUrl);
+			// For first request
+			String actionUrl = input.getCategoryUrl();
+			Document document = null;
+			
+			do {
+				try {
 				
-				document = connection.get();
-				Request request = connection.request();
-				Response response = connection.response();
-				
-				// Fetch each page (48 products max)
-				List<String> productsLink = CrawlUtil.getAllProductsLink(document);
-				
-				// For each link of products make a url and fetch them
-				for(String productLink : productsLink) {
-					if(Util.isNotNullAndEmpty(productLink)) {
-						
-						try {
+					// Make page request
+					Connection connection = RequestResponseUtil.makeRequest(actionUrl);
+					
+					document = connection.get();
+					Request request = connection.request();
+					Response response = connection.response();
+					
+					// Fetch each page (48 products max)
+					List<String> productsLink = CrawlUtil.getAllProductsLink(document);
+					
+					// For each link of products make a url and fetch them
+					for(String productLink : productsLink) {
+						if(Util.isNotNullAndEmpty(productLink)) {
 							
-							Connection productConnection = RequestResponseUtil.makeRequest(productLink);
-							
-							Document productDocument = productConnection.get();
-							Request productRequest = productConnection.request();
-							Response productResponse = productConnection.response();
-							
-							// Extract all info of the a product (call extractProduct() method)
-							Product product = ProductUtil.extractProduct(productDocument, productResponse);
-							
-							products.add(product);
-							
-						} catch (Exception e) {
-							
+							try {
+								
+								Connection productConnection = RequestResponseUtil.makeRequest(productLink);
+								
+								Document productDocument = productConnection.get();
+								Request productRequest = productConnection.request();
+								Response productResponse = productConnection.response();
+								
+								// Extract all info of the a product (call extractProduct() method)
+								Product product = ProductUtil.extractProduct(productDocument, productResponse, input.getCategoryName());
+								
+								products.add(product);
+								
+							} catch (Exception e) {
+								
+							}
 						}
 					}
+					
+				} catch (Exception e) {
+					// Log exception
 				}
+	
+				// Can goto next page or not?
+				actionUrl = CrawlUtil.getNextPage(document);
 				
-			} catch (Exception e) {
-				// Log exception
-			}
-
-			// Can goto next page or not?
-			actionUrl = CrawlUtil.getNextPage(document);
-			
-		} while(Util.isNotNullAndEmpty(actionUrl));
+			} while(Util.isNotNullAndEmpty(actionUrl));
+		}
 		
 		return products;
 	}
