@@ -35,7 +35,7 @@ public class CrawlUtil {
 	public static List<String> getAllProductsLink(Document document) {
 		List<String> productsLink = new LinkedList<>();
 		
-		Elements elems = document.getElementsByClass("product");
+		Elements elems = document.select(".product");
 		
 		for(Element elem : elems) {
 			productsLink.add(elem.attr("href"));

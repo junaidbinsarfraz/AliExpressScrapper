@@ -3,7 +3,9 @@ package com.aliexperssscrapper.controller;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
@@ -17,28 +19,59 @@ import com.aliexperssscrapper.util.ProductUtil;
 import com.aliexperssscrapper.util.RequestResponseUtil;
 import com.aliexperssscrapper.util.Util;
 
+/**
+ * The class ScrapperController is use to scrap each category's products
+ * 
+ * @author Junaid
+ */
 public class ScrapperController {
-	
+
+	/**
+	 * The method extractProductsFromCategory() is use to extract all the
+	 * products of given category.
+	 * 
+	 * @param input
+	 *            contains url, category name and max page to be scrapped
+	 * @return list of products
+	 */
 	public List<Product> extractProductsFromCategory(Input input) {
 		List<Product> products = new LinkedList<>();
 		
-		Boolean isCategoryFolderCreated = new File(Constants.OUTPUT_DIRECTORY + input.getCategoryName()).mkdir();
+		File categoryFolder = new File(Constants.OUTPUT_DIRECTORY + input.getCategoryName());
+		
+		Boolean isCategoryFolderCreated = Boolean.TRUE;
+		
+		if (Boolean.TRUE.equals(categoryFolder.exists())) {
+			try {
+				FileUtils.deleteDirectory(categoryFolder);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		isCategoryFolderCreated = categoryFolder.mkdir();
 		
 		if(Boolean.TRUE.equals(isCategoryFolderCreated)) {
 			
 			// For first request
 			String actionUrl = input.getCategoryUrl();
 			Document document = null;
+			Integer parsedPageCount = 0;
 			
-			do {
+			while(Util.isNotNullAndEmpty(actionUrl) && (Util.isNull(input.getMaxPageNumber()) || parsedPageCount++ < input.getMaxPageNumber())) {
 				try {
-				
+					
+					// Add delay
+					TimeUnit.SECONDS.sleep(Constants.SLEEP_TIME_IN_SECONDS);
+					
 					// Make page request
 					Connection connection = RequestResponseUtil.makeRequest(actionUrl);
 					
 					document = connection.get();
 					Request request = connection.request();
 					Response response = connection.response();
+					
+					System.out.println("Connection to : " + actionUrl);
 					
 					// Fetch each page (48 products max)
 					List<String> productsLink = CrawlUtil.getAllProductsLink(document);
@@ -49,11 +82,16 @@ public class ScrapperController {
 							
 							try {
 								
+								// Add delay
+								TimeUnit.SECONDS.sleep(Constants.SLEEP_TIME_IN_SECONDS);
+								
 								Connection productConnection = RequestResponseUtil.makeRequest(productLink);
 								
 								Document productDocument = productConnection.get();
 								Request productRequest = productConnection.request();
 								Response productResponse = productConnection.response();
+								
+								System.out.println("Connection to : " + productLink);
 								
 								// Extract all info of the a product (call extractProduct() method)
 								Product product = ProductUtil.extractProduct(productDocument, productResponse, input.getCategoryName());
@@ -61,19 +99,20 @@ public class ScrapperController {
 								products.add(product);
 								
 							} catch (Exception e) {
-								
+								System.out.println(e);
 							}
 						}
 					}
 					
 				} catch (Exception e) {
 					// Log exception
+					System.out.println(e);
 				}
 	
 				// Can goto next page or not?
 				actionUrl = CrawlUtil.getNextPage(document);
 				
-			} while(Util.isNotNullAndEmpty(actionUrl));
+			}
 		}
 		
 		return products;

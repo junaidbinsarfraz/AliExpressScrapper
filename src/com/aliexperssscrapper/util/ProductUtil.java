@@ -30,23 +30,31 @@ public class ProductUtil {
 		product.setUrl(response.url().toString());
 		
 		//Product Id
-		product.setId(getProductId(response.url().toString()));
+		String productId = getProductId(response.url().toString());
+		
+		product.setId(productId);
 		
 		// TODO: Create new Folder with product Id name, then save Images into the folder
-		String productPath = Constants.OUTPUT_DIRECTORY + categoryName + "\\" + title;
+		String productPath = Constants.OUTPUT_DIRECTORY + categoryName + "\\" + productId;
 		
 		Boolean isProductFolderCreated = new File(productPath).mkdir();
 		
 		if(Boolean.TRUE.equals(isProductFolderCreated)) {
-			Elements imageTagElems = document.getElementsByClass("div.ui-box-title:contains(Product Description)+div img");
+			Elements imageTagElems = document.select(".image-thumb-list .img-thumb-item img");
+			
+			Integer imagesCount = 1;
 			
 			for(Element imageTagElem : imageTagElems) {
-				Connection connection = RequestResponseUtil.makeRequest(imageTagElems.attr("src"));
+				String imageUrl = imageTagElem.attr("src");
+				imageUrl = imageUrl.replaceAll(Constants.SMALL_IMAGE_REPLACE_REGEX, "");
+				
+				Connection connection = RequestResponseUtil.makeRequest(imageUrl);
 				
 				try {
 					Response imageResponse = connection.ignoreContentType(true).execute();
 					
 					// TODO: Write into the image
+					FileUtil.saveImage(imageResponse, productPath + "\\" + imagesCount++ + ".jpg", imageUrl);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -148,7 +156,7 @@ public class ProductUtil {
 	private static Map<String, String> extractItemSpecs(Document document) {
 		Map<String, String> itemSpecs = new LinkedHashMap<>();
 		
-		Elements elems = document.getElementsByClass("div.ui-box-title:contains(Item specifics)+div ul.product-property-list li.property-item");
+		Elements elems = document.select("div.ui-box-title:contains(Item specifics)+div ul.product-property-list li.property-item");
 		
 		if(Util.isNotNullAndEmpty(elems)) {
 			
@@ -167,7 +175,7 @@ public class ProductUtil {
 	}
 	
 	private static String getProductId(String url) {
-		return url.substring(url.lastIndexOf("/"), url.indexOf(".htm"));
+		return url.substring(url.lastIndexOf("/") + 1, url.indexOf(".htm"));
 	}
 	
 }

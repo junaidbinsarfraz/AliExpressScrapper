@@ -9,9 +9,9 @@ public class Product implements Serializable {
 	private String title;
 	private String url;
 	private String id;
-	private String price;
-	private String lowPrice;
-	private String hightPrice;
+	private String price = "";
+	private String lowPrice = "";
+	private String hightPrice = "";
 	private String orderNumber;
 	private List<String> colors;
 	private List<String> sizes;
