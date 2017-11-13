@@ -137,7 +137,7 @@ public class FileUtil {
 			    
 			    for(String title : otherSpecsTitles.keySet()) {
 			    	productRow.createCell(count++).setCellValue(createHelper.createRichTextString(Util.isNull(product.getOtherSpecs().get(title)) ? 
-			    			"" : product.getOtherSpecs().get(title)));
+			    			"" : getString(product.getOtherSpecs().get(title))));
 			    }
 			    
 		    }

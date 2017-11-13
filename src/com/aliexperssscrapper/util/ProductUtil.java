@@ -25,6 +25,9 @@ public class ProductUtil {
 		ignoredTitles.add("Total Price");
 		ignoredTitles.add("Ships From");
 		ignoredTitles.add("Fit");
+		ignoredTitles.add("Services");
+		ignoredTitles.add("Store Promotion");
+		ignoredTitles.add("Payment");
 	}
 
 	/**
@@ -155,8 +158,8 @@ public class ProductUtil {
 	 *            to be parsed
 	 * @return parsed titles with values
 	 */
-	private static Map<String, String> extractItemOtherSpecs(Document document) {
-		Map<String, String> specs = new LinkedHashMap<>();
+	private static Map<String, List<String>> extractItemOtherSpecs(Document document) {
+		Map<String, List<String>> specs = new LinkedHashMap<>();
 		
 		Elements elems = document.getElementsByClass("p-property-item");
 		
@@ -169,19 +172,25 @@ public class ProductUtil {
 				
 				Elements linkElems = elem.select("a[data-role=sku]");
 				
+				List<String> specValues = new LinkedList<>();
+				
 				for(Element linkElem : linkElems) {
 					Element spanElem = linkElem.select("span").first();
 					
 					if(Util.isNotNull(spanElem)) {
-						specs.put(dtElem.text().replaceAll(":", ""), spanElem.text());
+						specValues.add(spanElem.text());
+//						specs.put(dtElem.text().replaceAll(":", ""), spanElem.text());
 					} else {
 						Element imgElem = linkElem.select("img").first();
 						
 						if(Util.isNotNull(imgElem)) {
-							specs.put(dtElem.text().replaceAll(":", ""), imgElem.attr("title"));
+							specValues.add(imgElem.attr("title"));
+//							specs.put(dtElem.text().replaceAll(":", ""), imgElem.attr("title"));
 						}
 					}
 				}
+				
+				specs.put(dtElem.text().replaceAll(":", ""), specValues);
 			}
 			
 		}
