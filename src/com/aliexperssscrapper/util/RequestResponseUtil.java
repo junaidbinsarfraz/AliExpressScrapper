@@ -1,16 +1,18 @@
 package com.aliexperssscrapper.util;
 
-import java.net.Proxy;
-import java.net.SocketAddress;
-import java.net.Proxy.Type;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.http.conn.HttpInetSocketAddress;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
+/**
+ * The class RequestResponseUtil is use to make the request of the url using
+ * proxies
+ * 
+ * @author Junaid
+ */
 public class RequestResponseUtil {
 	
 	private static List<String> proxies = new LinkedList<>();
@@ -28,6 +30,14 @@ public class RequestResponseUtil {
 		proxies.add("172.82.167.40:8800");
 	}
 	
+	/**
+	 * The method makeRequest() is use to make the request to given url with
+	 * proxy
+	 * 
+	 * @param url
+	 *            to make request
+	 * @return connection
+	 */
 	public static Connection makeRequest(String url) {
 		
 		String username = "";
@@ -70,6 +80,13 @@ public class RequestResponseUtil {
 		return connection;
 	}
 	
+	/**
+	 * The method beautifyUrl() is use to beautify and requestable Url
+	 * 
+	 * @param url
+	 *            to be beautified
+	 * @return beautiful and requestable url
+	 */
 	private static String beautifyUrl(String url) {
 		if(Util.isNotNullAndEmpty(url)) {
 			if(!url.startsWith("http")) {
@@ -80,6 +97,11 @@ public class RequestResponseUtil {
 		return url;
 	}
 	
+	/**
+	 * The method generateRandomNumber() is use to generate Random Number
+	 * 
+	 * @return randon number
+	 */
 	private static Integer generateRandomNumber() {
 		return 	new Random().nextInt(proxies.size());
 	}

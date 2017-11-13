@@ -17,6 +17,28 @@ import com.aliexperssscrapper.model.Product;
 
 public class ProductUtil {
 	
+	private static List<String> ignoredTitles = new LinkedList<>();
+	
+	static {
+		ignoredTitles.add("Shipping");
+		ignoredTitles.add("Quantity");
+		ignoredTitles.add("Total Price");
+		ignoredTitles.add("Ships From");
+		ignoredTitles.add("Fit");
+	}
+
+	/**
+	 * The method extractProduct() is use to extract all the details related to
+	 * given product
+	 * 
+	 * @param document
+	 *            product html document to be parsed
+	 * @param response
+	 *            of Request
+	 * @param categoryName
+	 *            to determine the folder path
+	 * @return product details
+	 */
 	public static Product extractProduct(Document document, Response response, String categoryName) {
 		
 		Product product = new Product();
@@ -90,19 +112,30 @@ public class ProductUtil {
 		}
 		
 		// colors 
-		product.setColors(extractColorsOrSizes(document, Boolean.TRUE));
+//		product.setColors(extractItemSpecs(document));
 		
 		// sizes
-		product.setSizes(extractColorsOrSizes(document, Boolean.FALSE));
+//		product.setSizes(extractItemSpecs(document));
 		
 		// Item specifics
 		product.setItemSpecs(extractItemSpecs(document));
 		
 		// TODO: Other Types
+		product.setOtherSpecs(extractItemOtherSpecs(document));
 		
 		return product;
 	}
-	
+
+	/**
+	 * The method findAndExtractTextByClassName() is use to extract text of
+	 * respective class name Element
+	 * 
+	 * @param document
+	 *            to be parsed
+	 * @param className
+	 *            class name
+	 * @return text written in the class named Element
+	 */
 	private static String findAndExtractTextByClassName(Document document, String className) {
 		String text = null;
 		
@@ -114,9 +147,16 @@ public class ProductUtil {
 		
 		return text;
 	}
-	
-	private static List<String> extractColorsOrSizes(Document document, Boolean isColor) {
-		List<String> colors = new LinkedList<>();
+
+	/**
+	 * The method extractItemOtherSpecs() is use to extract Item's Other Specs
+	 * 
+	 * @param document
+	 *            to be parsed
+	 * @return parsed titles with values
+	 */
+	private static Map<String, String> extractItemOtherSpecs(Document document) {
+		Map<String, String> specs = new LinkedHashMap<>();
 		
 		Elements elems = document.getElementsByClass("p-property-item");
 		
@@ -124,25 +164,21 @@ public class ProductUtil {
 			
 			Element dtElem = elem.child(0);
 			
-			if(Util.isNotNull(dtElem) && Util.isNotNullAndEmpty(dtElem.text())) {
-				if(dtElem.text().toLowerCase().contains(
-						Boolean.TRUE.equals(isColor) ? Constants.COLOR_TITLE.toLowerCase() : 
-							Constants.SIZE_TITLE.toLowerCase())) {
-					// Next sibling 
+			if(Util.isNotNull(dtElem) && isValidTitle(dtElem.text())) {
+				// Next sibling 
+				
+				Elements linkElems = elem.select("a[data-role=sku]");
+				
+				for(Element linkElem : linkElems) {
+					Element spanElem = linkElem.select("span").first();
 					
-					Elements linkElems = elem.select("a[data-role=sku]");
-					
-					for(Element linkElem : linkElems) {
-						Element spanElem = linkElem.select("span").first();
+					if(Util.isNotNull(spanElem)) {
+						specs.put(dtElem.text().replaceAll(":", ""), spanElem.text());
+					} else {
+						Element imgElem = linkElem.select("img").first();
 						
-						if(Util.isNotNull(spanElem)) {
-							colors.add(spanElem.text());
-						} else {
-							Element imgElem = linkElem.select("img").first();
-							
-							if(Util.isNotNull(imgElem)) {
-								colors.add(imgElem.attr("title"));
-							}
+						if(Util.isNotNull(imgElem)) {
+							specs.put(dtElem.text().replaceAll(":", ""), imgElem.attr("title"));
 						}
 					}
 				}
@@ -150,9 +186,39 @@ public class ProductUtil {
 			
 		}
 		
-		return colors;
+		return specs;
 	}
 	
+	/**
+	 * The method isValidTitle() is use to check the title against ignoredTitles
+	 * for its validity
+	 * 
+	 * @param title
+	 *            to be checked
+	 * @return true if valid else false
+	 */
+	private static Boolean isValidTitle(String title) {
+		if(Util.isNullOrEmpty(title)) {
+			return Boolean.FALSE;
+		}
+		
+		for(String ignoredTitle : ignoredTitles) {
+			if(title.toLowerCase().contains(ignoredTitle.toLowerCase())) {
+				return Boolean.FALSE;
+			}
+		}
+		
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * The method extractItemSpecs() is use to extract Item's Specs from given
+	 * document
+	 * 
+	 * @param document
+	 *            to be parsed
+	 * @return parsed titles with values
+	 */
 	private static Map<String, String> extractItemSpecs(Document document) {
 		Map<String, String> itemSpecs = new LinkedHashMap<>();
 		
@@ -173,7 +239,14 @@ public class ProductUtil {
 		
 		return itemSpecs;
 	}
-	
+
+	/**
+	 * The method getProductId() is use to extract product id from url
+	 * 
+	 * @param url
+	 *            to be parsed
+	 * @return product id
+	 */
 	private static String getProductId(String url) {
 		return url.substring(url.lastIndexOf("/") + 1, url.indexOf(".htm"));
 	}

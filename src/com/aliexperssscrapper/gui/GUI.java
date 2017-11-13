@@ -77,6 +77,7 @@ public class GUI extends Application {
 					file = fileChooser.showOpenDialog(primaryStage);
 					if (file != null) {
 						startButton.setDisable(Boolean.FALSE);
+						message.setText("");
 					}
 				}
 			});
@@ -130,7 +131,9 @@ public class GUI extends Application {
 	}
 
 	/**
-	 * The method configureFileChooser() is use to 
+	 * The method configureFileChooser() is use to configure the file chooser so
+	 * that it can only select csv file
+	 * 
 	 * @param fileChooser
 	 */
 	private static void configureFileChooser(final FileChooser fileChooser) {

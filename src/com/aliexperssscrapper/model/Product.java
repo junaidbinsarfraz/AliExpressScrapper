@@ -16,6 +16,7 @@ public class Product implements Serializable {
 	private List<String> colors;
 	private List<String> sizes;
 	private Map<String, String> itemSpecs;
+	private Map<String, String> otherSpecs;
 
 	public String getTitle() {
 		return title;
@@ -95,6 +96,14 @@ public class Product implements Serializable {
 
 	public void setItemSpecs(Map<String, String> itemSpecs) {
 		this.itemSpecs = itemSpecs;
+	}
+
+	public Map<String, String> getOtherSpecs() {
+		return otherSpecs;
+	}
+
+	public void setOtherSpecs(Map<String, String> otherSpecs) {
+		this.otherSpecs = otherSpecs;
 	}
 	
 }
