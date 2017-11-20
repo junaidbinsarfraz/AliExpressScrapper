@@ -31,10 +31,12 @@ public class CrawlUtil {
 			if(Util.isNotNull(elems)) {
 				Element elem = elems.first();
 				
-				if(elem.hasClass("ui-pagination-disabled")) {
-					return null;
-				} else {
-					return elem.attr("href");
+				if(Util.isNotNull(elem)) {
+					if(elem.hasClass("ui-pagination-disabled")) {
+						return null;
+					} else {
+						return elem.attr("href");
+					}
 				}
 			}
 		
