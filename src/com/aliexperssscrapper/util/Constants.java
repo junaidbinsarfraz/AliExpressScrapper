@@ -20,4 +20,7 @@ public interface Constants {
 	String OUTPUT_DIRECTORY = "E:\\Junaid\\";
 	Integer SLEEP_TIME_IN_SECONDS = 5;
 	
+	Float PROCESSING = -1.0f;
+	Float PROCESSED = 1.0f;
+	
 }

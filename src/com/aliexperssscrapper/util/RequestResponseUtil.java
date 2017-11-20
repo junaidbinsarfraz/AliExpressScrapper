@@ -7,6 +7,8 @@ import java.util.Random;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
+import com.aliexperssscrapper.gui.GUI;
+
 /**
  * The class RequestResponseUtil is use to make the request of the url using
  * proxies
@@ -18,7 +20,7 @@ public class RequestResponseUtil {
 	private static List<String> proxies = new LinkedList<>();
 	
 	static {
-		proxies.add("23.89.201.190:8800");
+		/*proxies.add("23.89.201.190:8800");
 		proxies.add("192.157.249.212:8800");
 		proxies.add("198.98.101.143:8800");
 		proxies.add("172.82.168.157:8800");
@@ -27,7 +29,9 @@ public class RequestResponseUtil {
 		proxies.add("23.81.173.236:8800");
 		proxies.add("172.245.217.220:8800");
 		proxies.add("192.157.253.52:8800");
-		proxies.add("172.82.167.40:8800");
+		proxies.add("172.82.167.40:8800");*/
+		
+		proxies = FileUtil.readProxies(GUI.proxyFile);
 	}
 	
 	/**

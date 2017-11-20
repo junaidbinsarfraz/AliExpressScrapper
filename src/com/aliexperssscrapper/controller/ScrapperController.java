@@ -11,6 +11,7 @@ import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 
+import com.aliexperssscrapper.gui.GUI;
 import com.aliexperssscrapper.model.Input;
 import com.aliexperssscrapper.model.Product;
 import com.aliexperssscrapper.util.Constants;
@@ -37,7 +38,7 @@ public class ScrapperController {
 	public List<Product> extractProductsFromCategory(Input input) {
 		List<Product> products = new LinkedList<>();
 		
-		File categoryFolder = new File(Constants.OUTPUT_DIRECTORY + input.getCategoryName());
+		File categoryFolder = new File(GUI.outputDirectory.getAbsolutePath() + "\\" + input.getCategoryName());
 		
 		Boolean isCategoryFolderCreated = Boolean.TRUE;
 		
@@ -62,7 +63,7 @@ public class ScrapperController {
 				try {
 					
 					// Add delay
-					TimeUnit.SECONDS.sleep(Constants.SLEEP_TIME_IN_SECONDS);
+					TimeUnit.SECONDS.sleep(GUI.delay);
 					
 					// Make page request
 					Connection connection = RequestResponseUtil.makeRequest(actionUrl);
@@ -83,7 +84,7 @@ public class ScrapperController {
 							try {
 								
 								// Add delay
-								TimeUnit.SECONDS.sleep(Constants.SLEEP_TIME_IN_SECONDS);
+								TimeUnit.SECONDS.sleep(GUI.delay);
 								
 								Connection productConnection = RequestResponseUtil.makeRequest(productLink);
 								

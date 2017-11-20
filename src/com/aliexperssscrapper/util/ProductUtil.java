@@ -13,6 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.aliexperssscrapper.gui.GUI;
 import com.aliexperssscrapper.model.Product;
 
 public class ProductUtil {
@@ -60,7 +61,8 @@ public class ProductUtil {
 		product.setId(productId);
 		
 		// TODO: Create new Folder with product Id name, then save Images into the folder
-		String productPath = Constants.OUTPUT_DIRECTORY + categoryName + "\\" + productId;
+//		String productPath = Constants.OUTPUT_DIRECTORY + categoryName + "\\" + productId;
+		String productPath = GUI.outputDirectory.getAbsolutePath() + "\\" + categoryName + "\\" + productId;
 		
 		Boolean isProductFolderCreated = new File(productPath).mkdir();
 		
