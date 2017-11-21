@@ -271,7 +271,11 @@ public class GUI extends Application {
 			primaryStage.setWidth(600);
 			
 			primaryStage.setScene(scene);
-			primaryStage.setOnCloseRequest(e -> thread.stop());
+			primaryStage.setOnCloseRequest(e -> {
+				if(thread != null) {
+					thread.stop();
+				}
+			});
 			
 			primaryStage.show();
 
